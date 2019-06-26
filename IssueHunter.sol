@@ -20,6 +20,7 @@ contract IssueHunter is Ownable {
     }
 
     mapping(address => string) id;
+    mapping(string => bool) usedId;
     mapping(address => uint256[]) issueBy;
     mapping(address => uint256[]) solvedIssueOf;
     Issue[] issues;
@@ -30,7 +31,10 @@ contract IssueHunter is Ownable {
     }
 
     function applyAccount(string github_id) public {
+        require(usedId[github_id] == false);
         id[msg.sender] = github_id;
+        usedId[github_id] = true;
+        erc20.transfer(by, 100);
     }
 
     function changeERC20(IERC20 new_erc20) public onlyOwner {
