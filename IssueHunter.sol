@@ -34,7 +34,12 @@ contract IssueHunter is Ownable {
         require(usedId[github_id] == false);
         id[msg.sender] = github_id;
         usedId[github_id] = true;
-        erc20.transfer(by, 100);
+        erc20.transfer(msg.sender, 100);
+    }
+
+    function assignAccountToNewAddress(address new_address) public {
+        id[new_address] = id[msg.sender];
+        id[msg.sender] = "";
     }
 
     function changeERC20(IERC20 new_erc20) public onlyOwner {
