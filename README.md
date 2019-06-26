@@ -1,1 +1,1 @@
-# issue-hunter-dapp
+# issue-hunter-bapp
