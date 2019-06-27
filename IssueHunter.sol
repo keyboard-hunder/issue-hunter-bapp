@@ -31,6 +31,23 @@ contract IssueHunter is Ownable {
         erc20 = default_erc20;
     }
 
+    function matchedIssue(string memory repoURL, uint256 issueNumber) public view returns (uint256 id) {
+        for(uint i=0; i<issues.length; ++i) {
+            if(!issues[i].solved) {
+                if(keccak256(abi.encodePacked(issues[i].repoURL)) == keccak256(abi.encodePacked(repoURL)) && 
+                    issues[i].issueNumber == issueNumber) {
+                    return issues[i].id;
+                }
+            }
+        }
+
+        return uint256(-1);
+    }
+
+    function getAddressByGithubId(string memory githubId) public view returns (address) {
+        return githubToAddress[githubId];
+    }
+
     function applyAccount(string memory github_id) public {
         require(isExistedGithub[github_id] == false);
         addressToGithub[msg.sender] = github_id;
