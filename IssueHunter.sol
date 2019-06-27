@@ -1,4 +1,5 @@
 pragma solidity ^0.5.6;
+pragma experimental ABIEncoderV2;
 
 import "./Ownable.sol";
 import "./SafeMath.sol";
@@ -28,9 +29,16 @@ contract IssueHunter is Ownable {
     mapping(address => uint256[]) public issueSolvedBy;
     Issue[] public issues;
     IERC20 public erc20;
+    int256 public newId;
+
 
     constructor(IERC20 default_erc20) public {
         erc20 = default_erc20;
+        newId = -1;
+    }
+
+    function allIssues() public view returns (Issue[] memory) {
+        return issues;
     }
 
     function matchedIssue(string memory repoURL, uint256 issueNumber) public view returns (uint256 id) {
@@ -62,7 +70,7 @@ contract IssueHunter is Ownable {
         erc20 = new_erc20;
     }
 
-    function makeIssue(address who, string memory repo, uint256 issueNumber, string memory title, string memory tags, uint256 price, string memory imageURL) public onlyOwner returns (uint256 new_id) {
+    function makeIssue(address who, string memory repo, uint256 issueNumber, string memory title, string memory tags, uint256 price, string memory imageURL) public onlyOwner {
         erc20.transferFrom(who, address(this), price);
 
         Issue memory issue = Issue(
@@ -70,7 +78,8 @@ contract IssueHunter is Ownable {
         );
         issues.push(issue);
         issueMadeBy[who].push(issues.length.sub(1));
-        return issues.length.sub(1);
+
+        newId = newId + 1;
     }
 
     function editIssueContents(uint256 _id, string memory repo, uint256 issueNumber, string memory title, string memory tags, bool active, string memory imageURL) public onlyOwner {
