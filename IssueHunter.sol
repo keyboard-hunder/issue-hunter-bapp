@@ -1,8 +1,10 @@
 pragma solidity ^0.5.6;
 
+
 import "./Ownable.sol";
 import "./SafeMath.sol";
 import "./IERC20.sol";
+
 
 contract IssueHunter is Ownable {
     using SafeMath for uint256;
@@ -34,7 +36,7 @@ contract IssueHunter is Ownable {
     function matchedIssue(string memory repoURL, uint256 issueNumber) public view returns (uint256 id) {
         for(uint i=0; i<issues.length; ++i) {
             if(!issues[i].solved) {
-                if(keccak256(abi.encodePacked(issues[i].repoURL)) == keccak256(abi.encodePacked(repoURL)) && 
+                if(keccak256(abi.encodePacked(issues[i].repoURL)) == keccak256(abi.encodePacked(repoURL)) &&
                     issues[i].issueNumber == issueNumber) {
                     return issues[i].id;
                 }
@@ -60,7 +62,7 @@ contract IssueHunter is Ownable {
         erc20 = new_erc20;
     }
 
-    function makeIssue(address who, string memory repo, uint256 issueNumber, string memory title, string memory tags, uint256 price) public onlyOwner {
+    function makeIssue(address who, string memory repo, uint256 issueNumber, string memory title, string memory tags, uint256 price) public onlyOwner returns (uint256 new_id) {
         erc20.transferFrom(who, address(this), price);
 
         Issue memory issue = Issue(
@@ -68,6 +70,7 @@ contract IssueHunter is Ownable {
         );
         issues.push(issue);
         issueMadeBy[who].push(issues.length.sub(1));
+        return issues.length.sub(1);
     }
 
     function editIssueContents(uint256 _id, string memory repo, uint256 issueNumber, string memory title, string memory tags, bool active) public onlyOwner {
