@@ -22,7 +22,7 @@ contract IssueHunter is Ownable {
     mapping(address => string) id;
     mapping(string => bool) usedId;
     mapping(address => uint256[]) issueBy;
-    mapping(address => uint256[]) solvedIssueOf;
+    mapping(address => uint256[]) solvedIssueBy;
     Issue[] issues;
     IERC20 erc20;
 
@@ -76,7 +76,7 @@ contract IssueHunter is Ownable {
     function _markSolvedIssue(uint256 _id, address by) internal onlyOwner {
         require(issues[_id].owner != address(0) && issues[_id].solved == false);
         issues[_id].solved = true;
-        solvedIssueOf[by].push(_id);
+        solvedIssueBy[by].push(_id);
     }
 
     function solve(uint256 _id, address by) public onlyOwner {
