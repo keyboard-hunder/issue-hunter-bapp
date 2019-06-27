@@ -1,4 +1,4 @@
-pragma solidity 0.4.24;
+pragma solidity ^0.4.24;
 pragma experimental ABIEncoderV2;
 
 import "./Ownable.sol";
@@ -46,8 +46,8 @@ contract IssueHunter is Ownable {
         erc20 = new_erc20;
     }
 
-    function makeIssue(string repo, string title, string[] tags, uint256 price) public payable {
-        require(msg.value == price);
+    function makeIssue(string repo, string title, string[] tags, uint256 price) public {
+        erc20.transferFrom(msg.sender, this, price);
 
         Issue memory issue = Issue(
             issues.length, msg.sender, repo, title, tags, price, false, true
@@ -65,11 +65,16 @@ contract IssueHunter is Ownable {
         issues[_id] = issue;
     }
 
-    function editIssuePrice(uint256 _id, uint256 price) public payable {
-        require(msg.value == price);
+    function editIssuePrice(uint256 _id, uint256 price) public {
         require(issues[_id].owner == msg.sender && issues[_id].solved == false);
 
-        msg.sender.transfer(issues[_id].price);
+        if (issues[_id].price > price) {
+            erc20.transfer(msg.sender, issues[_id].price.sub(price));
+        }
+        else if (issues[_id].price < price) {
+            erc20.transferFrom(msg.sender, this, price.sub(issues[_id].price));
+        }
+
         issues[_id].price = price;
     }
 

