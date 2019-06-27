@@ -21,8 +21,8 @@ contract IssueHunter is Ownable {
 
     mapping(address => string) githubId;
     mapping(string => bool) usedId;
-    mapping(address => uint256[]) issueBy;
-    mapping(address => uint256[]) solvedIssueBy;
+    mapping(address => uint256[]) issueMadeBy;
+    mapping(address => uint256[]) issueSolvedBy;
     Issue[] issues;
     IERC20 erc20;
 
@@ -53,7 +53,7 @@ contract IssueHunter is Ownable {
             issues.length, msg.sender, repo, title, tags, price, false, true
         );
         issues.push(issue);
-        issueBy[msg.sender].push(issues.length.sub(1));
+        issueMadeBy[msg.sender].push(issues.length.sub(1));
     }
 
     function editIssueContents(uint256 _id, string repo, string title, string[] tags, bool active) public {
@@ -76,7 +76,7 @@ contract IssueHunter is Ownable {
     function _markSolvedIssue(uint256 _id, address by) internal onlyOwner {
         require(issues[_id].owner != address(0) && issues[_id].solved == false);
         issues[_id].solved = true;
-        solvedIssueBy[by].push(_id);
+        issueSolvedBy[by].push(_id);
     }
 
     function solve(uint256 _id, address by) public onlyOwner {
