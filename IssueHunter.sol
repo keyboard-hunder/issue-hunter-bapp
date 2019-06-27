@@ -19,12 +19,12 @@ contract IssueHunter is Ownable {
         bool active;
     }
 
-    mapping(address => string) githubId;
+    mapping(address => string) public githubId;
     mapping(string => bool) usedId;
-    mapping(address => uint256[]) issueMadeBy;
-    mapping(address => uint256[]) issueSolvedBy;
-    Issue[] issues;
-    IERC20 erc20;
+    mapping(address => uint256[]) public issueMadeBy;
+    mapping(address => uint256[]) public issueSolvedBy;
+    Issue[] public issues;
+    IERC20 public erc20;
 
     constructor(IERC20 default_erc20) public {
         erc20 = default_erc20;
