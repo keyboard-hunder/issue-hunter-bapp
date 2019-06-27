@@ -1,10 +1,8 @@
 pragma solidity ^0.5.6;
 
-
 import "./Ownable.sol";
 import "./SafeMath.sol";
 import "./IERC20.sol";
-
 
 contract IssueHunter is Ownable {
     using SafeMath for uint256;
@@ -19,6 +17,8 @@ contract IssueHunter is Ownable {
         uint256 price;
         bool solved;
         bool active;
+        string imageURL;
+        uint256 timestamp;
     }
 
     mapping(address => string) public addressToGithub;
@@ -62,22 +62,22 @@ contract IssueHunter is Ownable {
         erc20 = new_erc20;
     }
 
-    function makeIssue(address who, string memory repo, uint256 issueNumber, string memory title, string memory tags, uint256 price) public onlyOwner returns (uint256 new_id) {
+    function makeIssue(address who, string memory repo, uint256 issueNumber, string memory title, string memory tags, uint256 price, string memory imageURL) public onlyOwner returns (uint256 new_id) {
         erc20.transferFrom(who, address(this), price);
 
         Issue memory issue = Issue(
-            issues.length, who, repo, issueNumber, title, tags, price, false, true
+            issues.length, who, repo, issueNumber, title, tags, price, false, true, imageURL, now
         );
         issues.push(issue);
         issueMadeBy[who].push(issues.length.sub(1));
         return issues.length.sub(1);
     }
 
-    function editIssueContents(uint256 _id, string memory repo, uint256 issueNumber, string memory title, string memory tags, bool active) public onlyOwner {
+    function editIssueContents(uint256 _id, string memory repo, uint256 issueNumber, string memory title, string memory tags, bool active, string memory imageURL) public onlyOwner {
         require(issues[_id].solved == false);
 
         Issue memory issue = Issue(
-            _id, issues[_id].owner, repo, issueNumber, title, tags, issues[_id].price, issues[_id].solved, active
+            _id, issues[_id].owner, repo, issueNumber, title, tags, issues[_id].price, issues[_id].solved, active, imageURL, issues[_id].timestamp
         );
         issues[_id] = issue;
     }
