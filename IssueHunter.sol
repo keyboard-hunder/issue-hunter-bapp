@@ -1,5 +1,4 @@
-pragma solidity ^0.4.24;
-pragma experimental ABIEncoderV2;
+pragma solidity ^0.5.6;
 
 import "./Ownable.sol";
 import "./SafeMath.sol";
@@ -11,7 +10,8 @@ contract IssueHunter is Ownable {
     struct Issue {
         uint256 id;
         address owner;
-        string repo;
+        string repoURL;
+        uint256 issueNumber;
         string title;
         string tags;
         uint256 price;
@@ -19,8 +19,9 @@ contract IssueHunter is Ownable {
         bool active;
     }
 
-    mapping(address => string) public githubId;
-    mapping(string => bool) usedId;
+    mapping(address => string) public addressToGithub;
+    mapping(string => address) public githubToAddress;
+    mapping(string => bool) isExistedGithub;
     mapping(address => uint256[]) public issueMadeBy;
     mapping(address => uint256[]) public issueSolvedBy;
     Issue[] public issues;
@@ -30,49 +31,45 @@ contract IssueHunter is Ownable {
         erc20 = default_erc20;
     }
 
-    function applyAccount(string github_id) public {
-        require(usedId[github_id] == false);
-        githubId[msg.sender] = github_id;
-        usedId[github_id] = true;
+    function applyAccount(string memory github_id) public {
+        require(isExistedGithub[github_id] == false);
+        addressToGithub[msg.sender] = github_id;
+        githubToAddress[github_id] = msg.sender;
+        isExistedGithub[github_id] = true;
         erc20.transfer(msg.sender, 100);
-    }
-
-    function assignAccountToNewAddress(address new_address) public {
-        githubId[new_address] = githubId[msg.sender];
-        githubId[msg.sender] = "";
     }
 
     function changeERC20(IERC20 new_erc20) public onlyOwner {
         erc20 = new_erc20;
     }
 
-    function makeIssue(string repo, string title, string tags, uint256 price) public {
-        erc20.transferFrom(msg.sender, this, price);
+    function makeIssue(address who, string memory repo, uint256 issueNumber, string memory title, string memory tags, uint256 price) public onlyOwner {
+        erc20.transferFrom(who, address(this), price);
 
         Issue memory issue = Issue(
-            issues.length, msg.sender, repo, title, tags, price, false, true
+            issues.length, who, repo, issueNumber, title, tags, price, false, true
         );
         issues.push(issue);
-        issueMadeBy[msg.sender].push(issues.length.sub(1));
+        issueMadeBy[who].push(issues.length.sub(1));
     }
 
-    function editIssueContents(uint256 _id, string repo, string title, string tags, bool active) public {
-        require(issues[_id].owner == msg.sender && issues[_id].solved == false);
+    function editIssueContents(uint256 _id, string memory repo, uint256 issueNumber, string memory title, string memory tags, bool active) public onlyOwner {
+        require(issues[_id].solved == false);
 
         Issue memory issue = Issue(
-            _id, msg.sender, repo, title, tags, issues[_id].price, issues[_id].solved, active
+            _id, issues[_id].owner, repo, issueNumber, title, tags, issues[_id].price, issues[_id].solved, active
         );
         issues[_id] = issue;
     }
 
-    function editIssuePrice(uint256 _id, uint256 price) public {
-        require(issues[_id].owner == msg.sender && issues[_id].solved == false);
+    function editIssuePrice(uint256 _id, uint256 price) public onlyOwner {
+        require(issues[_id].solved == false);
 
         if (issues[_id].price > price) {
-            erc20.transfer(msg.sender, issues[_id].price.sub(price));
+            erc20.transfer(issues[_id].owner, issues[_id].price.sub(price));
         }
         else if (issues[_id].price < price) {
-            erc20.transferFrom(msg.sender, this, price.sub(issues[_id].price));
+            erc20.transferFrom(issues[_id].owner, address(this), price.sub(issues[_id].price));
         }
 
         issues[_id].price = price;
