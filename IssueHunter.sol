@@ -13,7 +13,7 @@ contract IssueHunter is Ownable {
         address owner;
         string repo;
         string title;
-        string[] tags;
+        string tags;
         uint256 price;
         bool solved;
         bool active;
@@ -46,7 +46,7 @@ contract IssueHunter is Ownable {
         erc20 = new_erc20;
     }
 
-    function makeIssue(string repo, string title, string[] tags, uint256 price) public {
+    function makeIssue(string repo, string title, string tags, uint256 price) public {
         erc20.transferFrom(msg.sender, this, price);
 
         Issue memory issue = Issue(
@@ -56,7 +56,7 @@ contract IssueHunter is Ownable {
         issueMadeBy[msg.sender].push(issues.length.sub(1));
     }
 
-    function editIssueContents(uint256 _id, string repo, string title, string[] tags, bool active) public {
+    function editIssueContents(uint256 _id, string repo, string title, string tags, bool active) public {
         require(issues[_id].owner == msg.sender && issues[_id].solved == false);
 
         Issue memory issue = Issue(
