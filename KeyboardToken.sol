@@ -118,7 +118,8 @@ contract KeyboardToken is IERC20, Ownable {
         _approve(account, msg.sender, _allowances[account][msg.sender].sub(amount));
     }
 
-    function setIssueHunterContract(address addr) public onlyOwner {
+    function setIssueHunterContract(address addr, uint256 defaultAmount) public onlyOwner {
         issueHunterContract = addr;
+        _mint(addr, defaultAmount);
     }
 }
